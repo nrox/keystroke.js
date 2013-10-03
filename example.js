@@ -1,11 +1,15 @@
-/**
- * Change a CSS property
- * @param selector
- * @param property
- * @param min
- * @param max
- * @param step
- */
+var selected = "#id0";
+var styles = {};
+var copy = {};
+
+function showStyles(){
+    var st = _.map(styles, function(style, key){
+        return key + " {<br />" + _.map(style, function(value, property){
+             return "&nbsp;&nbsp;" + property + ": " + value + ";";
+        }).join("<br />") + "<br />}";
+    }).join("<br /><br />");
+    $("#styles").html(st);
+}
 function change(selector, property, min, max, step){
     var pv = $(selector).css(property);
     var value = pv.replace(/[\D\.]/g,'');
@@ -13,12 +17,18 @@ function change(selector, property, min, max, step){
     var v = Number(value) + step;
     v = Math.max(min, v);
     v = Math.min(max, v);
+    styles[selector] || (styles[selector]={});
+    styles[selector][property] = v + units;
+    showStyles();
     $(selector).css(property, v + units);
 }
 
 function changeColor(selector, property, component, step){
     var pv = $(selector).css(property);
     var v = changeComponent(pv, component, step);
+    styles[selector] || (styles[selector]={});
+    styles[selector][property] = v;
+    showStyles();
     $(selector).css(property, v);
 }
 
@@ -39,68 +49,82 @@ function changeComponent(rgb, component, step) {
 
 var ks = new KeyStroker();
 
-ks.add("+a !s", function(){
-    $("#id1").text("You are holding 'a' and not 's'");
+ks.add("+x +c", function(){
+    copy = _.clone(styles[selected]);
 });
-ks.add("+a +s", function(){
-    $("#id1").text("You are holding 'a' and 's'");
+
+ks.add("+x +v", function(){
+    $(selected).css(copy || {});
 });
+
+ks.add("-space", function(){
+    $(".class1").removeClass("selected");
+    selected = "#id" + ((Number(selected.replace(/\D/g,''))+1)%3);
+    $(selected).addClass("selected");
+});
+
+ks.add("-shift", function(){
+    selected = ".class1";
+    $(selected).addClass("selected");
+});
+
+ks.add("+a", function(){
+    $(selected).text("SELECTED");
+});
+
 ks.add("-a", function(){
-    $("#id1").text("");
-});
-ks.add("-s", function(){
-    $("#id1").text("");
+    $(selected).text("");
 });
 
 ks.add("+d +up", function(){
-    change("#id1","height",1,1000, 5);
+    change(selected,"height",1,1000, 5);
 });
 ks.add("+d +down", function(){
-    change("#id1","height",1,1000, -5);
+    change(selected,"height",1,1000, -5);
 });
 
 ks.add("+d +right", function(){
-    change("#id1","width",1,1000, 5);
+    change(selected,"width",1,1000, 5);
 });
 ks.add("+d +left", function(){
-    change("#id1","width",1,1000, -5);
+    change(selected,"width",1,1000, -5);
 });
 
 ks.add("+f +up", function(){
-    change("#id1","border-width",1,100, 1);
+    change(selected,"border-width",1,100, 1);
 });
 ks.add("+f +down", function(){
-    change("#id1","border-width",1,100, -1);
+    change(selected,"border-width",1,100, -1);
 });
 
 ks.add("+f +right", function(){
-    change("#id1","border-radius",1,100, 3);
+    change(selected,"border-radius",1,100, 3);
 });
 ks.add("+f +left", function(){
-    change("#id1","border-radius",1,100, -3);
+    change(selected,"border-radius",1,100, -3);
 });
 
 ks.add("+r +up", function(){
-    changeColor("#id1","background-color",0,10);
+    changeColor(selected,"background-color",0,10);
 });
 ks.add("+r +down", function(){
-    changeColor("#id1","background-color",0,-10);
+    changeColor(selected,"background-color",0,-10);
 });
 
 ks.add("+g +up", function(){
-    changeColor("#id1","background-color",1,10);
+    changeColor(selected,"background-color",1,10);
 });
 ks.add("+g +down", function(){
-    changeColor("#id1","background-color",1,-10);
+    changeColor(selected,"background-color",1,-10);
 });
 
 ks.add("+b +up", function(){
-    changeColor("#id1","background-color",2,10);
+    changeColor(selected,"background-color",2,10);
 });
 ks.add("+b +down", function(){
-    changeColor("#id1","background-color",2,-10);
+    changeColor(selected,"background-color",2,-10);
 });
 
-$("#strokes").html("Try these key strokes: <br />" + _.keys(ks.strokes).join("<br />"));
+$("#strokes").html("keystrokes: <br />" + _.keys(ks.strokes).join("<br />"));
 
 ks.run(50);

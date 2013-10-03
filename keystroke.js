@@ -48,6 +48,7 @@ KeyStroker.prototype.matchFromDictionary = function (keysDownList, keysUpList) {
         }) && key;
     });
     matchedKeys = _.without(matchedKeys, false);
+    //if (_.size(matchedKeys)) console.log(matchedKeys);
     return _.values(_.pick(this.strokes, matchedKeys));
 };
 
